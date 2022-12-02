@@ -117,5 +117,5 @@ void main(void) {
     }
 
     // Print the result
-    printf("Total between top %i elves: %li", NUM_MAX_TOTALS, interElfTotal);
+    printf("Total between top %i elves: %li\n", NUM_MAX_TOTALS, interElfTotal);
 }
