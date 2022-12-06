@@ -64,6 +64,10 @@ bool hasRepeats(char *buffer, unsigned int numChars) {
 }
 
 
+/// @brief Entry point for finding the position of the unique code
+/// @param argc The number of arguments (3)
+/// @param argv [Program name, input file, size of unique code to find]
+/// @return Exit code
 int main(int argc, char **argv) {
 
     // Open the input file
