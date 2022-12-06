@@ -3,17 +3,22 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include <time.h>
 
+// Defintions
 #define MAX_LINE_LENGTH UCHAR_MAX
 
+// Type defintion for a box moving instruction
+typedef struct instruction {
+    unsigned int src;
+    unsigned int dest;
+    unsigned int num;
+} inst_t;
 
-typedef struct StackInfo {
-    unsigned int index;
-    unsigned int size;
-    char *stackOrder;
-} stack_info_t;
 
-
+/// @brief Get the number of stacks
+/// @param fp The file pointer
+/// @return The number of stacks
 unsigned int getNumberOfStacks(FILE *fp) {
 
     // Get a buffer to store characters
@@ -35,6 +40,9 @@ unsigned int getNumberOfStacks(FILE *fp) {
 }
 
 
+/// @brief Get the size of the current largest stack
+/// @param fp The file pointer
+/// @return The size of the current largest stack
 unsigned int getCurrentMaxStack(FILE *fp) {
 
     // Get a buffer to store characters
@@ -57,59 +65,66 @@ unsigned int getCurrentMaxStack(FILE *fp) {
 }
 
 
-void allocateStacks(stack_info_t *stacks, unsigned int stackCount, unsigned int initialMaxStack) {
-
-    // Get the max size needed for each stack array
-    unsigned int maxStackSize = (stackCount * initialMaxStack) + 1;
-    unsigned int structSize = sizeof(unsigned int)*2 + sizeof(char)*maxStackSize;
-
-    // Allocate an array for the stacks list
-    stacks = malloc(stackCount * structSize);
-
-    // Add pointers to each character array
-    for (int index = 0; index < stackCount; index++) {
-        printf("111FDSHFUD2233S\n");
-        //stacks[index]->index = index;
-        //stacks[index]->size = 5;
-        stacks[index]->stackOrder = "ABCE";
-        //stacks[index] = {index, 5, "ABCE"};
-        printf("IFIFIF: %s\n", stacks[index]->stackOrder);
-    }
-
-    printf("FDSHFUD2233S\n");
-
-}
-
-
-void deallocateStacks(stack_info_t **stacks, unsigned int numStacks) {
-    free(stacks);
-}
-
-
-void initializeStacks(FILE *fp, stack_info_t **stacks, unsigned int numStacks, unsigned int initialMaxStack) {
+/// @brief Initialize the stacks
+/// @param fp The file pointer
+/// @param stacks A pointer to store the stacks state information
+/// @param numStacks The number of stacks
+/// @param initialMaxStack The size of the current largest stack
+void initializeStacks(FILE *fp, char **stacks, unsigned int numStacks, unsigned int initialMaxStack) {
     
     // Get current file pointer position and set to beginning
     unsigned long currentPosition = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     
     for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {
-        printf("FDSD2S: %i\n", stackIndex);
-        printf("SSS:\n");
-        printf("OHH: %s\n", stacks[stackIndex]->stackOrder);
-        stacks[stackIndex]->stackOrder[initialMaxStack] = '\0';
-        printf("QQQ\n");
+        stacks[stackIndex][initialMaxStack] = '\0';
         for (int heightIndex = initialMaxStack - 1; heightIndex >= 0; heightIndex--) {
-            printf("AAA\n");
             unsigned long newPosition = ((4*stackIndex) + 1) + (4*numStacks*((initialMaxStack-1)-heightIndex));
             fseek(fp, newPosition, SEEK_SET);
             char boxChar = fgetc(fp);
-            stacks[stackIndex]->stackOrder[heightIndex] = boxChar == ' ' ? '\0' : boxChar;
+            stacks[stackIndex][heightIndex] = boxChar == ' ' ? '\0' : boxChar;
         }
-        printf("Initial stack: %s\n", stacks[stackIndex]->stackOrder);
+        printf("Initialized stack: %s\n", stacks[stackIndex]);
     }
 
     // Reset the file pointer position
     fseek(fp, currentPosition, SEEK_SET);
+
+}
+
+
+/// @brief Move the file pointer location to the instructions
+/// @param fp The file pointer
+void moveToInstructions(FILE *fp) {
+    char tempReader[MAX_LINE_LENGTH];
+    while (true) {
+        fgets(tempReader, sizeof(tempReader), fp);
+        if (tempReader[0] == '\n') { return; }
+    }
+}
+
+
+/// @brief Parse and instruction from a line from the file
+/// @param fp The file pointer
+/// @return An instruction that should be executed
+inst_t parseInstuction(FILE *fp) {
+    inst_t inst;
+    fscanf(fp, "move %u from %u to %u\n", &inst.num, &inst.src, &inst.dest);
+    return inst;
+}
+
+
+/// @brief Execition a given instruction
+/// @param stacks THe stacks state pointer
+/// @param currentInstruction The current instruction to execute
+void executeInstruction(char **stacks, inst_t currentInstruction) {
+
+    for (int boxIndex = 0; boxIndex < currentInstruction.num; boxIndex++) {
+        unsigned long lengthArray = strlen(stacks[currentInstruction.src - 1]);
+        char *topBox = &(stacks[currentInstruction.src - 1][lengthArray - 1]);
+        strncat(stacks[currentInstruction.dest - 1], topBox, 1);
+        stacks[currentInstruction.src - 1][lengthArray - 1] = '\0';
+    }
 
 }
 
@@ -133,31 +148,44 @@ int main(int argc, char **argv) {
     // Calculate the max stack size need to allocate
     unsigned int maxStackSize = numStacks * currentMaxStack;
 
-    // Allocate memory for stacks
-    stack_info_t **stacksInfo;
-    allocateStacks(stacksInfo, numStacks, currentMaxStack);
-    for (int tempy = 0; tempy < numStacks; tempy++) {
-        printf("This is %s\n", stacksInfo[tempy]->stackOrder);
+    // Allocate memory for each stack
+    char *stacks[numStacks];
+    for (int index = 0; index < numStacks; index++) {
+        stacks[index] = (char *)malloc(maxStackSize + 1);
     }
 
     // Initialize stacks
-    initializeStacks(fp, stacksInfo, numStacks, currentMaxStack);
+    initializeStacks(fp, stacks, numStacks, currentMaxStack);
+
+    // Move to instructions
+    moveToInstructions(fp);
 
     // Iterate through file
     while (true) {
 
         // Get a line from the file
-        fgets(fileLine, sizeof(fileLine), fp);
+        inst_t currentInstruction = parseInstuction(fp);
+
+        // Execute the instruction
+        executeInstruction(stacks, currentInstruction);
 
         // Stop iterating if end of file
         if (feof(fp)) { break; }
 
-        // Remove the newline character from the string
-        fileLine[strcspn(fileLine, "\n")] = 0;
-
     }
 
-    // Deallocate the memory used in the heap
-    deallocateStacks(stacksInfo, numStacks);
+    // Print the current state of the boxes
+    char *topBoxes = malloc(numStacks + 1);
+    topBoxes[strlen(topBoxes)] = '\0';
+    for (int index = 0; index < numStacks; index++) {
+        topBoxes[index] = stacks[index][strlen(stacks[index]) - 1];
+    }
+    printf("----------------------------\n");
+    printf("Top boxes are %s\n", topBoxes);
+
+    // Free the allocated memory
+    for (int index = 0; index < numStacks; index++) {
+        free(stacks[index]);
+    }
 
 }
