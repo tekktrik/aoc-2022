@@ -115,7 +115,7 @@ inst_t parseInstuction(FILE *fp) {
 
 
 /// @brief Execition a given instruction
-/// @param stacks THe stacks state pointer
+/// @param stacks The stacks state pointer
 /// @param currentInstruction The current instruction to execute
 void executeInstruction(char **stacks, inst_t currentInstruction) {
 
