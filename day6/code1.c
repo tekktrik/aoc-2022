@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
     unsigned long position = numChars;
 
     // Get the first three characters
-    char buffer[numChars + 1];
+    char *buffer = malloc(numChars + 1);
     buffer[numChars] = '\0';
     fgets(buffer, numChars + 1, fp);
 
@@ -95,6 +95,9 @@ int main(int argc, char **argv) {
     // Print out the unique string and index
     printf("Unique code: %s\n", buffer);
     printf("Position: %lu\n", position);
+
+    // Free the allocated memory
+    free(buffer);
 
     // Return exit code 0 for success
     return 0;
