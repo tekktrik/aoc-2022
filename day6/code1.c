@@ -35,6 +35,7 @@ bool hasRepeats(char *buffer, unsigned int numChars) {
 
     // Assign temporary variables for storing unique characters
     char *tempBuffer = malloc(numChars + 1);
+    tempBuffer[0] = '\0';
     unsigned int tempIndex = 0;
 
     // Iterate through buffer and create a buffer of unique characters
@@ -50,9 +51,8 @@ bool hasRepeats(char *buffer, unsigned int numChars) {
             }
         }
         if (newChar) {
-            tempBuffer[tempIndex] = buffer[index];
+            strncat(tempBuffer, &buffer[index], 1);
             tempIndex++;
-            tempBuffer[tempIndex] = '\0';
         }
     }
 
