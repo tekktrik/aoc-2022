@@ -121,7 +121,6 @@ void executeInstruction(char **stacks, inst_t currentInstruction) {
 
     unsigned long lengthArray = strlen(stacks[currentInstruction.src - 1]);
     char *topBox = &(stacks[currentInstruction.src - 1][lengthArray - currentInstruction.num]);
-    printf("***: %s\n", topBox);
     strncat(stacks[currentInstruction.dest - 1], topBox, currentInstruction.num);
     stacks[currentInstruction.src - 1][lengthArray - currentInstruction.num] = '\0';
 }
