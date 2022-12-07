@@ -28,23 +28,27 @@ bool is_command(char *file_line) {
 
 
 void strip_command_flag(char *file_line) {
-    memmove(&file_line[0], &file_line[2], strlen(file_line) - 2);
+    //printf("AAA %sBBB\n", file_line);
+    //printf("STRLEN A: %lu\n", strlen(file_line));
+    memmove(&file_line[0], &file_line[2], strlen(file_line)-2);
+    file_line[strlen(file_line) - 3] = '\0';
+    //printf("CCC %sDDD\n", file_line);
+    //printf("STRLEN B: %lu\n", strlen(file_line));
 }
 
 
 bool is_command_x(char *file_line, char *command) {
-    char *temp_buffer = malloc(strlen(command) + 1);
-    temp_buffer[strlen(command)] = '\0';
+    char temp_buffer[MAX_LINE_LEN];
     strncpy(temp_buffer, file_line, strlen(command));
-    int result = !strcmp(temp_buffer, command);
-    free(temp_buffer);
+    bool result = (!strcmp(temp_buffer, command));
     return result;
 }
 
 
 command_id_t get_command(char *file_line) {
-    if (is_command_x(file_line, "cd")) { return CD; }
-    if (is_command_x(file_line, "ls")) { return LS; }
+    printf("IN GET COMMAND\n");
+    if (is_command_x(file_line, "cd")) { printf("IS cd\n"); return CD; }
+    if (is_command_x(file_line, "ls")) { printf("IS ls\n"); return LS; }
     printf("Unidentified command reached: %s", file_line);
     printf("Exiting!\n");
     exit(1);
@@ -71,6 +75,21 @@ char * parse_cd_command(char *file_line) {
 }
 
 
+void parse_items(FILE *fp, file_item_t *current_directory) {
+    while (true) {
+        char next_char = fgetc(fp);
+        if (next_char == '$') { break; }
+        else if (next_char == 'd') { continue; }
+        char temp_buffer[100];
+        fseek(fp, -1, SEEK_CUR);
+        fgets(temp_buffer, sizeof(temp_buffer), fp);
+        char *str_size = strtok(temp_buffer, " ");
+        unsigned long filesize = atoi(str_size);
+        current_directory->size += filesize;
+    }
+}
+
+
 void parse_file_tree(FILE *fp, file_item_t *current_dir) {
 
     // Use variable to track size of directory
@@ -87,27 +106,31 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir) {
         total_count++;
         printf("Total dirs seen: %lu\n", total_count);
 
+        printf("@ PARSING LINE: %s", file_line);
+
         // Break if end of file reached
         if (feof(fp)) { break; }  // TODO: Change to return stucture
 
+        //printf("Before striping: %sPPP\n", file_line);
         if (is_command(file_line)) {  // If command...
             strip_command_flag(file_line);
-            /*
+            //printf("After striping: %sZZZ\n", file_line);
+            char *new_dir_name;
             switch (get_command(file_line)) {
                 case CD:
-                    printf("");
-                    //printf("Parsing cd...\n");
-                    char *new_dir_name;
+                    printf("Parsing cd...\n");
                     new_dir_name = parse_cd_command(file_line);
                     //printf("Parsed new directory name!\n");
                     if (!strcmp(new_dir_name, "..")) {  // Travel up one directory
                         // TODO: Add size
-                        //printf("Traveling up!\n");
+                        printf("Traveling up!\n");
+                        //printf("This directory's size: %lu\n", current_dir->size);
+                        return;
                     }
                     else {  // Enter new directory
                         //printf("Parsing new directory %s\n", new_dir_name);
                         // TODO: Create new file item
-                        file_item_t **contained_items = malloc(0);
+                        file_item_t **contained_items = malloc(sizeof(file_item_t));
                         file_item_t *child_dir = malloc(sizeof(file_item_t));
                         //printf("Checkpoint A\n");
                         child_dir->file_type = DIR_ID;
@@ -117,32 +140,28 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir) {
                         child_dir->items = (void **)contained_items;
                         current_dir->num_items = current_dir->num_items + 1;
                         //printf("Checkpoint B\n");
-                        printf("New size: %lu\n", (current_dir->num_items)*sizeof(file_item_t));
-                        printf("pre: %lu\n", current_dir->items);
-                        file_item_t **temp_ptr = (file_item_t **)realloc(current_dir->items, 10000*(current_dir->num_items)*sizeof(file_item_t));
-                        printf("post %lu\n", temp_ptr);
+                        //printf("New size: %lu\n", (current_dir->num_items)*sizeof(file_item_t));
+                        //printf("pre: %lu\n", current_dir->items);
+                        file_item_t **temp_ptr = (file_item_t **)realloc(current_dir->items, (current_dir->num_items)*sizeof(file_item_t));
+                        //printf("post %lu\n", temp_ptr);
                         if (temp_ptr == NULL) { printf("Failed realloc!\n"); exit(1); }
                         else { current_dir->items = (void **)temp_ptr; }
                         //printf("Checkpoint C\n");
                         ((file_item_t **)(current_dir->items))[current_dir->num_items - 1] = child_dir;
-                        //printf("Parsed child directory!\n");
-                        // TODO: Add child directory to parent
-                        // TODO: Parse the new directory
-                        // TODO: Return out of new directory and add size
+                        parse_file_tree(fp, child_dir);
+                        current_dir->size += child_dir->size;
                     }
-                    //printf("OTHER 1\n");
                     break;
                 case LS:
-                    //printf("Parsing ls...\n");
+                    printf("Parsing ls...\n");
                     // TODO: Parse files listed by ls command
                     // NOTE: DIR commands can probably be ignored!
+                    parse_items(fp, current_dir);
                     break;
                 default:
-                    //printf("Unidentified command reached, exiting.");
+                    printf("Unidentified command reached, exiting.");
                     exit(1);
-                    break;
             }
-            */
         }
         else { // Not command..
             if (is_dir(file_line)) {  // Is directory...
@@ -175,6 +194,8 @@ int main(int argc, char **argv) {
     file_item_t current_directory = { DIR_ID, 0, 0, base_name, (void **)contained_items };
 
     // Get rid of first line since it's just setting to base directory
+    char trash_buffer[10];
+    fgets(trash_buffer, 10, fp);
 
     // Begin parsing stucture
     parse_file_tree(fp, &current_directory);
