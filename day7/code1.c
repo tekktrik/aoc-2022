@@ -7,6 +7,7 @@
 #define MAX_LINE_LEN UCHAR_MAX
 
 unsigned long total_count = 0;
+unsigned long line_count = 0;
 
 // Define type definition for commands
 typedef enum { CD, LS } command_id_t;
@@ -38,18 +39,29 @@ void strip_command_flag(char *file_line) {
 
 
 bool is_command_x(char *file_line, char *command) {
+    printf("A: %s\n", file_line);
+    printf("len: %lu\n", strlen(file_line));
+    printf("B: %s\n", command);
+    printf("len: %lu\n", strlen(command));
     char temp_buffer[MAX_LINE_LEN];
-    strncpy(temp_buffer, file_line, strlen(command));
-    bool result = (!strcmp(temp_buffer, command));
+    char other_buffer[MAX_LINE_LEN];
+    strncpy(temp_buffer, file_line, strlen(file_line));
+    //strncpy(other_buffer, command, 2);
+    temp_buffer[2] = '\0';
+    printf("C: %s\n", temp_buffer);
+    printf("len: %lu\n", strlen(temp_buffer));
+    bool result = !strcmp(temp_buffer, command);
+    printf("%d\n", result);
     return result;
 }
 
 
 command_id_t get_command(char *file_line) {
-    printf("IN GET COMMAND\n");
-    if (is_command_x(file_line, "cd")) { printf("IS cd\n"); return CD; }
-    if (is_command_x(file_line, "ls")) { printf("IS ls\n"); return LS; }
-    printf("Unidentified command reached: %s", file_line);
+    printf("IN GETCOMMAND\n");
+    if (is_command_x(file_line, "cd")) { return CD; }
+    if (is_command_x(file_line, "ls")) { return LS; }
+    //printf("IN GET COMMAND with %s\n", file_line);
+    printf("Unidentified command reached: %sPQP", file_line);
     printf("Exiting!\n");
     exit(1);
 }
@@ -76,6 +88,7 @@ char * parse_cd_command(char *file_line) {
 
 
 void parse_items(FILE *fp, file_item_t *current_directory) {
+    // Something wrong here
     while (true) {
         char next_char = fgetc(fp);
         if (next_char == '$') { break; }
@@ -83,6 +96,7 @@ void parse_items(FILE *fp, file_item_t *current_directory) {
         char temp_buffer[100];
         fseek(fp, -1, SEEK_CUR);
         fgets(temp_buffer, sizeof(temp_buffer), fp);
+        line_count++;
         char *str_size = strtok(temp_buffer, " ");
         unsigned long filesize = atoi(str_size);
         current_directory->size += filesize;
@@ -91,6 +105,8 @@ void parse_items(FILE *fp, file_item_t *current_directory) {
 
 
 void parse_file_tree(FILE *fp, file_item_t *current_dir) {
+
+    printf("Now parsing %s\n", current_dir->name);
 
     // Use variable to track size of directory
     unsigned long long directory_size = 0;
@@ -103,6 +119,7 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir) {
 
         // Read a line from the file
         fgets(file_line, MAX_LINE_LEN, fp);
+        line_count++;
         total_count++;
         printf("Total dirs seen: %lu\n", total_count);
 
@@ -111,15 +128,18 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir) {
         // Break if end of file reached
         if (feof(fp)) { break; }  // TODO: Change to return stucture
 
-        //printf("Before striping: %sPPP\n", file_line);
+        printf("Before striping: %sPPP\n", file_line);
         if (is_command(file_line)) {  // If command...
+            printf("Still checking line: %s", file_line);
             strip_command_flag(file_line);
             //printf("After striping: %sZZZ\n", file_line);
             char *new_dir_name;
             switch (get_command(file_line)) {
                 case CD:
+                    /*
                     printf("Parsing cd...\n");
                     new_dir_name = parse_cd_command(file_line);
+                    printf("Parsing new directory %s\n", new_dir_name);
                     //printf("Parsed new directory name!\n");
                     if (!strcmp(new_dir_name, "..")) {  // Travel up one directory
                         // TODO: Add size
@@ -128,7 +148,6 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir) {
                         return;
                     }
                     else {  // Enter new directory
-                        //printf("Parsing new directory %s\n", new_dir_name);
                         // TODO: Create new file item
                         file_item_t **contained_items = malloc(sizeof(file_item_t));
                         file_item_t *child_dir = malloc(sizeof(file_item_t));
@@ -148,9 +167,12 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir) {
                         else { current_dir->items = (void **)temp_ptr; }
                         //printf("Checkpoint C\n");
                         ((file_item_t **)(current_dir->items))[current_dir->num_items - 1] = child_dir;
+                        printf("TO PARSE: %s\n", child_dir->name);
                         parse_file_tree(fp, child_dir);
+                        printf("DONE PARSING: %s\n", child_dir->name);
                         current_dir->size += child_dir->size;
                     }
+                    */
                     break;
                 case LS:
                     printf("Parsing ls...\n");
@@ -164,6 +186,7 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir) {
             }
         }
         else { // Not command..
+            printf("HELLO?\n");
             if (is_dir(file_line)) {  // Is directory...
                 //printf("pass a\n");
             }
@@ -183,9 +206,9 @@ int main(int argc, char **argv) {
     FILE *fp = fopen(argv[1], "r");
 
     // Initialize base name
-    char *base_name = malloc(0);
+    char *base_name = malloc(2);
     char *temp_name = "/";
-    memmove(base_name, temp_name, 1);
+    memmove(base_name, temp_name, 2);
 
     // Initialize list of directories
     file_item_t **contained_items = malloc(1);
@@ -196,12 +219,14 @@ int main(int argc, char **argv) {
     // Get rid of first line since it's just setting to base directory
     char trash_buffer[10];
     fgets(trash_buffer, 10, fp);
+    printf("trash: %sQQQ", trash_buffer);
 
     // Begin parsing stucture
     parse_file_tree(fp, &current_directory);
     //printf("Size of %lu\n", sizeof(file_item_t));
 
     // Return exit code for success
+    printf("Lines counted: %lu\n", line_count);
     printf("EXIT\n");
     return 0;
 
