@@ -122,6 +122,10 @@ void parse_items(FILE *fp, file_item_t *current_directory) {
 }
 
 
+/// @brief Parse a directory
+/// @param fp A pointer to the open file
+/// @param current_dir The directory to parse
+/// @param size_limit The maximum size limit to keep track of
 void parse_file_tree(FILE *fp, file_item_t *current_dir, unsigned long long size_limit) {
 
     // Use variable to track size of directory
