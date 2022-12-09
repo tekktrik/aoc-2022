@@ -12,10 +12,10 @@
 
 
 // Type definition for a rope end
-typedef struct RopeEnd {
+typedef struct Knot {
     long x;
     long y;
-} rope_end_t;
+} knot_t;
 
 
 // Type definition for the rope position
@@ -97,7 +97,7 @@ move_inst_t parse_instruction(char *file_line) {
 /// @param tail Pointer to the tail
 /// @param position_list Pointer to the position list
 /// @param tail_moved Whether the tail moved to a new location on this move
-void record_tail_position(rope_end_t *tail, rope_pos_list_t *position_list, bool tail_moved) {
+void record_tail_position(knot_t *tail, rope_pos_list_t *position_list, bool tail_moved) {
     
     // Add tail position to counted list if already there
     for (unsigned long index = 0; index < position_list->num_positions; index++) {
@@ -137,7 +137,7 @@ void record_tail_position(rope_end_t *tail, rope_pos_list_t *position_list, bool
 /// @param tail Pointer to the tail
 /// @param head Pointer to the head
 /// @return Whether the tail moved to a new location
-bool move_rope_tail(rope_end_t *tail, rope_end_t *head) {
+bool move_rope_tail(knot_t *tail, knot_t *head) {
 
     // Keep track of whether the tail has moved
     bool tail_moved = false;
@@ -168,7 +168,7 @@ bool move_rope_tail(rope_end_t *tail, rope_end_t *head) {
 /// @brief Move the rope head as part of a single step within an instruction
 /// @param head Pointer to the head
 /// @param instruction The instruction of which this step is a part
-void move_rope_head(rope_end_t *head, move_inst_t instruction) {
+void move_rope_head(knot_t *head, move_inst_t instruction) {
     int increment = instruction.direction == FORWARD ? 1 : -1;
     if (instruction.alignment == HORIZONTAL) { head->x += increment; }
     else { head->y += increment; }
@@ -180,7 +180,7 @@ void move_rope_head(rope_end_t *head, move_inst_t instruction) {
 /// @param tail Pointer to the tail
 /// @param position_list Pointer to the position list
 /// @param instruction The current instruction of which this step is a part
-void execute_step(rope_end_t *head, rope_end_t *tail, rope_pos_list_t *position_list, move_inst_t instruction) {
+void execute_step(knot_t *head, knot_t *tail, rope_pos_list_t *position_list, move_inst_t instruction) {
     move_rope_head(head, instruction);
     bool tail_moved = move_rope_tail(tail, head);
     record_tail_position(tail, position_list, tail_moved);
@@ -192,7 +192,7 @@ void execute_step(rope_end_t *head, rope_end_t *tail, rope_pos_list_t *position_
 /// @param head Pointer to the head
 /// @param tail Pointer to the tail
 /// @param position_list Pointer to the position list
-void execute_instruction(move_inst_t instruction, rope_end_t *head, rope_end_t *tail, rope_pos_list_t *position_list) {
+void execute_instruction(move_inst_t instruction, knot_t *head, knot_t *tail, rope_pos_list_t *position_list) {
     for (long move_index = 0; move_index < instruction.num_steps; move_index++) {
         execute_step(head, tail, position_list, instruction);
     }
@@ -212,8 +212,8 @@ int main(int argc, char **argv) {
     FILE *fp = fopen(argv[1], "r");
 
     // Initialize rope positions
-    rope_end_t head = {0, 0};
-    rope_end_t tail = {0, 0};
+    knot_t head = {0, 0};
+    knot_t tail = {0, 0};
 
     // Initialize variable for storing positions
     rope_pos_t *positions;
