@@ -141,7 +141,7 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir, unsigned long long size
         fgets(file_line, MAX_LINE_LEN, fp);
 
         // Break if end of file reached
-        if (feof(fp)) { break; }  // TODO: Change to return stucture
+        if (feof(fp)) { break; }
 
         // Check if command was issued
         if (is_command(file_line)) {  // If command...
@@ -179,7 +179,7 @@ void parse_file_tree(FILE *fp, file_item_t *current_dir, unsigned long long size
                         child_dir->file_type = DIR_ID;
                         child_dir->size = 0;
                         child_dir->num_items = 0;
-                        child_dir->name = new_dir_name;  // TODO: Use new directory name
+                        child_dir->name = new_dir_name;
                         child_dir->items = (void **)contained_items;
 
                         // Reallocate memory for the current directory's children to add this one
