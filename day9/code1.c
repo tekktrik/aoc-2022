@@ -39,6 +39,7 @@ typedef enum {HORIZONTAL, VERTICAL} alignment_t;
 typedef enum {FORWARD, BACKWARD} direction_t;
 
 // Type definition for move instructions
+
 typedef struct MoveInstruction {
     alignment_t alignment;
     direction_t direction;
