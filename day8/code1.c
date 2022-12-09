@@ -100,7 +100,7 @@ void allocate_bool_matrix(bool ***input_matrix, unsigned int num_rows, unsigned 
 /// @param visible_map A pointer to a bool** 2D matrix to store the result
 /// @param num_rows The number of rows in the matrix
 /// @param num_cols The number of columns in the matrix
-void calculate_score_from_left(char ***tree_map, bool ***visible_map, unsigned int num_rows, unsigned int num_cols) {
+void mark_from_left(char ***tree_map, bool ***visible_map, unsigned int num_rows, unsigned int num_cols) {
     tree_t leftmost_tree;
     for (int row_index = 0; row_index < num_rows; row_index++) {
         leftmost_tree.grid_value = 0;
@@ -227,23 +227,28 @@ int main(int argc, char **argv) {
     // Open the input file
     FILE *fp = fopen(argv[1], "r");
 
+    // Get the matrix dimensions
     unsigned int num_rows = get_num_rows(fp);
     unsigned int num_cols = get_num_cols(fp);
 
+    // Allocate and initialize the tree map
     char **tree_map;
     allocate_char_matrix(&tree_map, num_rows, num_cols);
     init_tree_map(fp, &tree_map, num_rows, num_cols);
 
+    // Allocate and initialize the visibility map
     bool **visible_map;
     allocate_bool_matrix(&visible_map, num_rows, num_cols);
     init_visible_map(&visible_map, num_rows, num_cols);
 
+    // Mark trees as visibile from the left and rotate, for all sides of the matrix
     for (int index = 0; index < 4; index++) {
-        calculate_score_from_left(&tree_map, &visible_map, num_rows, num_cols);
+        mark_from_left(&tree_map, &visible_map, num_rows, num_cols);
         rotate_char_clockwise(&tree_map, num_rows, num_cols);
         rotate_bool_clockwise(&visible_map, num_rows, num_cols);
     }
 
+    // Print the answer
     unsigned int total = count_visible_trees(visible_map, num_rows, num_cols);
     printf("Total trees visible: %u\n", total);
 
