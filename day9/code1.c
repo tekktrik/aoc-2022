@@ -11,7 +11,7 @@
 #endif
 
 
-// Type definition for a rope end
+// Type definition for a knot
 typedef struct Knot {
     long x;
     long y;
@@ -137,7 +137,7 @@ void record_tail_position(knot_t *tail, rope_pos_list_t *position_list, bool tai
 /// @param tail Pointer to the tail
 /// @param head Pointer to the head
 /// @return Whether the tail moved to a new location
-bool move_rope_tail(knot_t *tail, knot_t *head) {
+bool move_knot(knot_t *tail, knot_t *head) {
 
     // Keep track of whether the tail has moved
     bool tail_moved = false;
@@ -182,7 +182,7 @@ void move_rope_head(knot_t *head, move_inst_t instruction) {
 /// @param instruction The current instruction of which this step is a part
 void execute_step(knot_t *head, knot_t *tail, rope_pos_list_t *position_list, move_inst_t instruction) {
     move_rope_head(head, instruction);
-    bool tail_moved = move_rope_tail(tail, head);
+    bool tail_moved = move_knot(tail, head);
     record_tail_position(tail, position_list, tail_moved);
 }
 
