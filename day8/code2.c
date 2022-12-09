@@ -224,17 +224,21 @@ int main(int argc, char **argv) {
     // Open the input file
     FILE *fp = fopen(argv[1], "r");
 
+    // Get the matrix dimensions
     unsigned int num_rows = get_num_rows(fp);
     unsigned int num_cols = get_num_cols(fp);
 
+    // Allocate and intialize the tree map
     char **tree_map;
     allocate_char_matrix(&tree_map, num_rows, num_cols);
     init_tree_map(fp, &tree_map, num_rows, num_cols);
 
+    // Allocate and initialize the score map
     unsigned int **score_map;
     allocate_unsigned_int_matrix(&score_map, num_rows, num_cols);
     init_score_map(&score_map, num_rows, num_cols);
 
+    // Score from the left and rotate the matrix for each side
     for (int index = 0; index < 4; index++) {
         calculate_score_from_left(&tree_map, &score_map, num_rows, num_cols);
         rotate_char_clockwise(&tree_map, num_rows, num_cols);
