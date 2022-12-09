@@ -100,7 +100,7 @@ void allocate_bool_matrix(bool ***input_matrix, unsigned int num_rows, unsigned 
 /// @param visible_map A pointer to a bool** 2D matrix to store the result
 /// @param num_rows The number of rows in the matrix
 /// @param num_cols The number of columns in the matrix
-void mark_from_left(char ***tree_map, bool ***visible_map, unsigned int num_rows, unsigned int num_cols) {
+void calculate_score_from_left(char ***tree_map, bool ***visible_map, unsigned int num_rows, unsigned int num_cols) {
     tree_t leftmost_tree;
     for (int row_index = 0; row_index < num_rows; row_index++) {
         leftmost_tree.grid_value = 0;
@@ -239,8 +239,7 @@ int main(int argc, char **argv) {
     init_visible_map(&visible_map, num_rows, num_cols);
 
     for (int index = 0; index < 4; index++) {
-        mark_from_left(&tree_map, &visible_map, num_rows, num_cols);
-
+        calculate_score_from_left(&tree_map, &visible_map, num_rows, num_cols);
         rotate_char_clockwise(&tree_map, num_rows, num_cols);
         rotate_bool_clockwise(&visible_map, num_rows, num_cols);
     }
