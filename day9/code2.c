@@ -230,9 +230,7 @@ int main(int argc, char **argv) {
 
     // Initialize knot positions
     for (int index = 0; index < rope.length; index++) {
-        knot_t *new_knot = malloc(sizeof(knot_t));
-        new_knot->x = 0;
-        new_knot->y = 0;
+        knot_t *new_knot = calloc(1, sizeof(knot_t));
         knots[index] = new_knot;
     }
 
