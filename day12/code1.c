@@ -229,7 +229,7 @@ unsigned int find_shortest_path_length(map_t map, nodepool_t starts, node_t end,
 
     // Increase the generation and check the new nodes
     generation++;
-    find_shortest_path_length(map, new_nodepool, end, nodepool, generation);
+    return find_shortest_path_length(map, new_nodepool, end, nodepool, generation);
 }
 
 
