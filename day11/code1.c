@@ -10,12 +10,17 @@
     #define MAX_LINE_LEN UCHAR_MAX
 #endif
 
+
+/// The maximum size of a monkey's inventory
 #define MAX_MONKEY_INVENTORY 100
 
 
+/// Type definition for enumerated values representing the
+/// operation to perform when updating worry levels
 typedef enum {MULT, ADD} operation_t;
 
 
+/// @brief Type definition for monkeys
 typedef struct Monkey {
     unsigned int num_items;
     unsigned long long *items;
@@ -29,6 +34,9 @@ typedef struct Monkey {
 } monkey_t;
 
 
+/// @brief Trim characters on the left side of a string
+/// @param file_line The string
+/// @param n The number of characters to trim
 void ltrim_chars(char *file_line, unsigned int n) {
     char *new_line = file_line + n;
     strncpy(file_line, new_line, strlen(new_line));
@@ -36,6 +44,9 @@ void ltrim_chars(char *file_line, unsigned int n) {
 }
 
 
+/// @brief Parse the input file for initilizing the monkeys
+/// @param fp A pointer to the open file
+/// @param monkeys A pointer to an array of monkey pointers
 void parse_monkeys(FILE *fp, monkey_t ***monkeys) {
 
     // Allocate memory for the line buffer
@@ -161,6 +172,10 @@ unsigned int get_num_monkeys(FILE *fp) {
 }
 
 
+/// @brief Update the worry level of an item
+/// @param monkey The monkey with the item
+/// @param item_level The item in questions
+/// @return The new item level
 unsigned long update_worry_level(monkey_t monkey, unsigned long long item_level) {
     unsigned long long value = monkey.op_old_mult ? item_level : monkey.op_value;
     switch (monkey.op_type)
@@ -177,11 +192,18 @@ unsigned long update_worry_level(monkey_t monkey, unsigned long long item_level)
 }
 
 
+/// @brief Test the worry level and decide on a monkey to pass to
+/// @param monkey The monkey with the item
+/// @param item_level The item level in question
+/// @return The index of the monkey the item should go to
 unsigned long long test_worry_level(monkey_t monkey, unsigned long long item_level) {
     return item_level % monkey.test_divisor ? monkey.test_false_monkey : monkey.test_true_monkey;
 }
 
 
+/// @brief Simulate a round of the monkeys
+/// @param monkeys A pointer to an array of monkey pointers
+/// @param num_monkeys The number of monkeys
 void simulate_round(monkey_t ***monkeys, unsigned int num_monkeys) {
     for (unsigned int monkey_index = 0; monkey_index < num_monkeys; monkey_index++) {
         monkey_t *current_monkey = (*monkeys)[monkey_index];
