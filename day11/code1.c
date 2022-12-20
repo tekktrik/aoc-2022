@@ -220,6 +220,10 @@ void simulate_round(monkey_t ***monkeys, unsigned int num_monkeys) {
 }
 
 
+/// @brief Main program
+/// @param argc The number of arguments
+/// @param argv [Name of program, Path to input file, Number of rounds to simulate]
+/// @return The exit code result
 int main(int argc, char **argv) {
 
     // Open the input file
@@ -239,6 +243,7 @@ int main(int argc, char **argv) {
         simulate_round(&monkeys, num_monkeys);
     }
 
+    // Get the two highest monkey's scores
     unsigned long long monkey_a_max = 0;
     unsigned long long  monkey_b_max = 0;
     for (int monkey_index = 0; monkey_index < num_monkeys; monkey_index++) {
@@ -253,6 +258,10 @@ int main(int argc, char **argv) {
         }
     }
 
+    // Calculate and print the monkey business
     printf("Monkey business: %llu\n", monkey_a_max * monkey_b_max);
+
+    // Return exit code 0 for success
+    return 0;
 
 }
