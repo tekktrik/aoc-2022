@@ -41,6 +41,27 @@ void ltrim_chars(char *file_line, unsigned int n) {
 }
 
 
+void print_list(list_struct_t *list) {
+    printf("[");
+    for (int index = 0; index < list->num_items; index++) {
+        if (index != 0) { printf(","); }
+        switch (list->elements[index]->item_type)
+        {
+        case NUMBER:
+            printf("%li", list->elements[index]->value);
+            break;
+        case LIST:
+            print_list(list->elements[index]);
+            break;
+        default:
+            printf("Error occurred!  Exiting...\n");
+            exit(1);
+        }
+    }
+    printf("]");
+}
+
+
 /// @brief Compare two lists
 /// @param list_a Pointer to the first list
 /// @param list_b Pointer to the second list
@@ -314,6 +335,12 @@ int main(int argc, char **argv) {
         unsigned long ordering_result = add_to_ordered_list(marker, &ordered_lists, index - 1);
         marker_product *= ordering_result;
         index++;
+    }
+
+    // Print lists in order
+    for (int print_index = 0; print_index < index - 1; print_index++) {
+        print_list(ordered_lists[print_index]);
+        printf("\n");
     }
 
     // Print the product of the marker indices
