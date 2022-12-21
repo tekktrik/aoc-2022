@@ -70,7 +70,9 @@ order_t compare_lists(list_struct_t *list_a, list_struct_t *list_b) {
 
         // Create a nested list for the number
         list_struct_t *sub_list = malloc(sizeof(list_struct_t));
+        int mod_status = 0;
         if (a_item->item_type == NUMBER && b_item->item_type == LIST) {
+            mod_status = 1;
             a_item->elements = malloc(sizeof(list_struct_t *));
             a_item->elements[0] = sub_list;
             a_item->elements[0]->item_type = NUMBER;
@@ -79,6 +81,7 @@ order_t compare_lists(list_struct_t *list_a, list_struct_t *list_b) {
             a_item->item_type = LIST;
         }
         else if (a_item->item_type == LIST && b_item->item_type == NUMBER) {
+            mod_status = -1;
             b_item->elements = malloc(sizeof(list_struct_t *));
             b_item->elements[0] = sub_list;
             b_item->elements[0]->item_type = NUMBER;
@@ -89,6 +92,17 @@ order_t compare_lists(list_struct_t *list_a, list_struct_t *list_b) {
 
         // Compare the two lists
         order_t sub_result = compare_lists(a_item, b_item);
+        if (mod_status == 1) {
+            a_item->item_type = NUMBER;
+            a_item->value = a_item->elements[0]->value;
+            free(a_item->elements);
+        }
+        else if (mod_status == -1) {
+            b_item->item_type = NUMBER;
+            b_item->value = b_item->elements[0]->value;
+            free(b_item->elements);
+        }
+        free(sub_list);
         if (sub_result != UNDETERMINED) { return sub_result; }
 
     }
