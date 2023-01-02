@@ -6,7 +6,7 @@
 // TODO: Add documentation
 typedef struct HashInfoItem {
     char *key;
-    int pressure;
+    int rate;
     char **connections;
     unsigned int num_connections;
     bool opened;

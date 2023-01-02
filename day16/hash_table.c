@@ -43,7 +43,7 @@ hash_info_item_t * create_info_item(char *key, int pressure, char **connections,
     // Allocate memory for item and members
     hash_info_item_t *new_item = malloc(sizeof(hash_info_item_t));
     new_item->key = malloc(strlen(key) + 1);
-    new_item->pressure = pressure;
+    new_item->rate = pressure;
     new_item->opened = false;
     new_item->num_connections = num_connections;
     new_item->connections = malloc(num_connections * sizeof(char *));
